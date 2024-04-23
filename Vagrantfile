@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
   # config.vm.box = "base"
-  config.vm.box = "ubuntu/bionic64"
+  config.vm.box = "bento/ubuntu-22.04-arm64"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -57,7 +57,7 @@ Vagrant.configure("2") do |config|
   (1..NUM_MASTER_NODE).each do |i|
       config.vm.define "kubemaster" do |node|
         # Name shown in the GUI
-        node.vm.provider "virtualbox" do |vb|
+        node.vm.provider "parallels" do |vb|
             vb.name = "kubemaster"
             vb.memory = 2048
             vb.cpus = 2
@@ -80,7 +80,7 @@ Vagrant.configure("2") do |config|
   # Provision Worker Nodes
   (1..NUM_WORKER_NODE).each do |i|
     config.vm.define "kubenode0#{i}" do |node|
-        node.vm.provider "virtualbox" do |vb|
+        node.vm.provider "parallels" do |vb|
             vb.name = "kubenode0#{i}"
             vb.memory = 2048
             vb.cpus = 2
