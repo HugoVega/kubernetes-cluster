@@ -55,46 +55,35 @@ Vagrant.configure("2") do |config|
 
   # Provision Master Nodes
   (1..NUM_MASTER_NODE).each do |i|
-      config.vm.define "kubemaster" do |node|
+      config.vm.define "kube-control-plane-#{sprintf("%04d", i)}" do |node|
         # Name shown in the GUI
-        node.vm.provider "parallels" do |vb|
-            vb.name = "kubemaster"
-            vb.memory = 2048
-            vb.cpus = 2
+        node.vm.provider "parallels" do |vm|
+            vm.name = "kube-control-plane-#{sprintf("%04d", i)}" 
+            vm.memory = 2048
+            vm.cpus = 2
+            vm.linked_clone = true
+            vm.update_guest_tools = true
         end
-        node.vm.hostname = "kubemaster"
+        node.vm.hostname = "kube-control-plane-#{sprintf("%04d", i)}"
         node.vm.network :private_network, ip: IP_NW + "#{MASTER_IP_START + i}"
         node.vm.network "forwarded_port", guest: 22, host: "#{2710 + i}"
-
-        node.vm.provision "setup-hosts", :type => "shell", :path => "ubuntu/vagrant/setup-hosts.sh" do |s|
-          s.args = ["enp0s8"]
-        end
-
-        node.vm.provision "setup-dns", type: "shell", :path => "ubuntu/update-dns.sh"
-        node.vm.provision "install-docker", type: "shell", :path => "ubuntu/install-docker-2.sh"
-
       end
   end
 
 
   # Provision Worker Nodes
   (1..NUM_WORKER_NODE).each do |i|
-    config.vm.define "kubenode0#{i}" do |node|
-        node.vm.provider "parallels" do |vb|
-            vb.name = "kubenode0#{i}"
-            vb.memory = 2048
-            vb.cpus = 2
+    config.vm.define "kube-worker-#{sprintf("%04d", i)}" do |node|
+        node.vm.provider "parallels" do |vm|
+            vm.name = "kube-worker-#{sprintf("%04d", i)}"
+            vm.memory = 2048
+            vm.cpus = 2
+            vm.linked_clone = true
+            vm.update_guest_tools = true
         end
-        node.vm.hostname = "kubenode0#{i}"
+        node.vm.hostname = "kube-worker-#{sprintf("%04d", i)}"
         node.vm.network :private_network, ip: IP_NW + "#{NODE_IP_START + i}"
-                node.vm.network "forwarded_port", guest: 22, host: "#{2720 + i}"
-
-        node.vm.provision "setup-hosts", :type => "shell", :path => "ubuntu/vagrant/setup-hosts.sh" do |s|
-          s.args = ["enp0s8"]
-        end
-
-        node.vm.provision "setup-dns", type: "shell", :path => "ubuntu/update-dns.sh"
-        node.vm.provision "install-docker", type: "shell", :path => "ubuntu/install-docker-2.sh"
+        node.vm.network "forwarded_port", guest: 22, host: "#{2720 + i}"
     end
   end
 end
